@@ -16,30 +16,30 @@ class Program
         httpClient.DefaultRequestHeaders.Add("x-api-key", "Token token=aea04f79bd8548644c46f448f630b807, company_key=074e3915-dd7a-40a0-84cd-3bebe93447a8");
 
         var allTasks = new List<Task>();
-        var times = new List<long>();
         var requestStatistics = new ConcurrentBag<ResponseInfo>();
         for (var threadNumber = 1; threadNumber <= threads; threadNumber++)
         {
             for (int i = 1; i <= requestPerThread; i++)
             {
-                allTasks.Add(ProcessUrlAsync(baseUrl, threadNumber, i, times,requestStatistics));
+                allTasks.Add(ProcessUrlAsync(baseUrl, threadNumber, i, requestStatistics));
             }
         }
 
         await Task.WhenAll(allTasks);
-
-        double avg = times.Count > 0 ? (double)times.Sum() / times.Count : 0;
-        Console.WriteLine($"Average Time = {avg} ms");
+        var totalReport = new TotalReport(requestStatistics.ToList());
         Console.WriteLine("----------Finish!----------");
-        Console.WriteLine($"Number of threads: {threads}");
         Console.WriteLine("----------Logs!----------");
         foreach (var requests in requestStatistics)
         {
             Console.WriteLine(requests.ToString());
         }
+        Console.WriteLine("----------Statistic!----------");
+        Console.WriteLine("# of threads:\t\t" + threads);
+        Console.WriteLine("# in one thread:\t" + requestPerThread);
+        Console.WriteLine(totalReport);
     }
 
-    static async Task ProcessUrlAsync(string baseUrl, int threadNumber, int iteration, List<long> times,
+    static async Task ProcessUrlAsync(string baseUrl, int threadNumber, int iteration, 
         ConcurrentBag<ResponseInfo> requestStatistics)
     {
         int pageNum = (threadNumber - 1) * threads * 10 + iteration;
@@ -58,10 +58,6 @@ class Program
                 ? $"{threadNumber} {iteration} {url} - finished: {response.StatusCode} in {time} ms"
                 : $"{threadNumber} {iteration} {url} - failed with status code: {response.StatusCode} in {time} ms");
 
-            lock (times)
-            {
-                times.Add(time);
-            }
             requestStatistics.Add(new ResponseInfo(response, time, threadNumber, iteration, pageNum));
         }
         catch (Exception ex)

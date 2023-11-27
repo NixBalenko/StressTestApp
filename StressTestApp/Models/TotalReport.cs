@@ -21,10 +21,11 @@ public class TotalReport
 
     public double SuccessRate => CountOfRequests == 0 ? 0 :
         CountOfFailedRequests == 0 ? 1 : 1 - (double)CountOfFailedRequests / CountOfRequests;
+
     public int CountOfRequests => _responseInfos.Count;
     public int CountOfFailedRequests => _responseInfos.Count(x => !x.IsSuccessStatusCode);
 
-    public Dictionary<string, int> ErrorsByStatusCode  => CalculateErrorsByStatusCode();
+    public Dictionary<string, int> ErrorsByStatusCode => CalculateErrorsByStatusCode();
 
     private Dictionary<string, int> CalculateErrorsByStatusCode()
     {
@@ -41,13 +42,28 @@ public class TotalReport
             return 0;
         }
 
-        var requestsDurationSorted= this._responseInfos.Select(x=>x.ElapsedMs).OrderBy(x=>x).ToArray();
+        var requestsDurationSorted = this._responseInfos.Select(x => x.ElapsedMs).OrderBy(x => x).ToArray();
         var countOfRequests = requestsDurationSorted.Length;
-        double n = (countOfRequests - 1) * (percentile/100) + 1;
+        double n = (countOfRequests - 1) * (percentile / 100) + 1;
         if (n == 1d) return requestsDurationSorted[0];
         if (n == countOfRequests) return requestsDurationSorted[countOfRequests - 1];
         int k = (int)n;
         double d = n - k;
         return requestsDurationSorted[k - 1] + d * (requestsDurationSorted[k] - requestsDurationSorted[k - 1]);
+    }
+
+    public override string ToString()
+    {
+        return $"# of requests:\t\t{CountOfRequests}\n" +
+               $"# of failed requests:\t{CountOfFailedRequests}\n" +
+               $"Success rate:\t\t{Math.Round(SuccessRate)}\n" +
+               $"AVG response time:\t{Math.Round(AverageResponseTime)}\n" +
+               $"MIN response time:\t{MinResponseTime}\n" +
+               $"MAX response time:\t{MaxResponseTime}\n" +
+               $"50 percentile:\t\t{Math.Round(Percentile50)}\n" +
+               $"90 percentile:\t\t{Math.Round(Percentile90)}\n" +
+               $"95 percentile:\t\t{Math.Round(Percentile95)}\n" +
+               $"99 percentile:\t\t{Math.Round(Percentile99)}\n" +
+               $"Errors by status code:\n {string.Join(", ", ErrorsByStatusCode.Select(x => $"{x.Key} - {x.Value}"))}";
     }
 }
