@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StressTestApp", "StressTestApp\StressTestApp.csproj", "{B6A17B50-83F5-4C61-92C2-06AF4006CECC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StressTestApp.UnitTests", "StressTestApp.UnitTests\StressTestApp.UnitTests.csproj", "{29D5C439-DC2F-45AC-AA84-7C3F1AABE080}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B6A17B50-83F5-4C61-92C2-06AF4006CECC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B6A17B50-83F5-4C61-92C2-06AF4006CECC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B6A17B50-83F5-4C61-92C2-06AF4006CECC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B6A17B50-83F5-4C61-92C2-06AF4006CECC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{29D5C439-DC2F-45AC-AA84-7C3F1AABE080}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{29D5C439-DC2F-45AC-AA84-7C3F1AABE080}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{29D5C439-DC2F-45AC-AA84-7C3F1AABE080}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{29D5C439-DC2F-45AC-AA84-7C3F1AABE080}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
