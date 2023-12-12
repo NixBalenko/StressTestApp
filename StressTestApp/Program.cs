@@ -2,45 +2,64 @@
 using System.Diagnostics;
 using StressTestApp.Models;
 
-class Program
+partial class Program
 {
     static readonly HttpClient httpClient = new HttpClient();
-    static readonly int threads = 2;
-    static readonly int requestPerThread = 3;
 
     static async Task Main(string[] args)
     {
-        string apiGWDeal = "https://3ickvifyzf.execute-api.us-east-2.amazonaws.com/epam-igm-qa/v1/deals?per=1&page=";
-        var baseUrl = apiGWDeal;
-        httpClient.DefaultRequestHeaders.Add("Authorization", "Token token=aea04f79bd8548644c46f448f630b807, company_key=074e3915-dd7a-40a0-84cd-3bebe93447a8");
-        httpClient.DefaultRequestHeaders.Add("x-api-key", "Token token=aea04f79bd8548644c46f448f630b807, company_key=074e3915-dd7a-40a0-84cd-3bebe93447a8");
+        var stressTestParams = new StressTestParams
+        {
+            ThreadCount = 5,
+            RequestPerThread = 10,
+            BaseUrlWithPathToPage = "http://epam-igm-qa-orch-service-alb-1240739889.us-east-2.elb.amazonaws.com/api/v1/stories?per=1&page=",
+            AuthToken = "Token token=aa601ab42270edc4433f878cac861e50, company_key=8bc9f1b2-b862-48f3-90a6-7b0391899ec6"
+        };
+  
+        var datetimeStart = DateTime.Now;
+        var requestStatistics = await RunStressTest(stressTestParams);
+        var datetimeEnd = DateTime.Now;
+        
+        var totalReport = new TotalReport(requestStatistics.ToList());
+        PrintTotalReport(requestStatistics, datetimeStart, datetimeEnd, totalReport, stressTestParams);
+    }
 
+    private static async Task<ConcurrentBag<ResponseInfo>> RunStressTest(StressTestParams stressTestParams)
+    {
+        httpClient.DefaultRequestHeaders.Add("Authorization", stressTestParams.AuthToken);
         var allTasks = new List<Task>();
         var requestStatistics = new ConcurrentBag<ResponseInfo>();
-        for (var threadNumber = 1; threadNumber <= threads; threadNumber++)
+        for (var threadNumber = 1; threadNumber <= stressTestParams.ThreadCount; threadNumber++)
         {
-            for (int i = 1; i <= requestPerThread; i++)
+            for (var i = 1; i <= stressTestParams.RequestPerThread; i++)
             {
-                allTasks.Add(ProcessUrlAsync(baseUrl, threadNumber, i, requestStatistics));
+                allTasks.Add(ProcessUrlAsync(stressTestParams.BaseUrlWithPathToPage, threadNumber, i, requestStatistics, stressTestParams.ThreadCount));
             }
         }
-
         await Task.WhenAll(allTasks);
-        var totalReport = new TotalReport(requestStatistics.ToList());
+
+        return requestStatistics;
+    }
+
+    private static void PrintTotalReport(ConcurrentBag<ResponseInfo> requestStatistics, DateTime datetimeStart, DateTime datetimeEnd,
+        TotalReport totalReport, StressTestParams stressTestParams)
+    {
         Console.WriteLine("----------Finish!----------");
         Console.WriteLine("----------Logs!----------");
-        foreach (var requests in requestStatistics)
+        foreach (var requests in requestStatistics.Where(x=>!x.IsSuccessStatusCode))
         {
             Console.WriteLine(requests.ToString());
         }
         Console.WriteLine("----------Statistic!----------");
-        Console.WriteLine("# of threads:\t\t" + threads);
-        Console.WriteLine("# in one thread:\t" + requestPerThread);
+        Console.WriteLine("# of threads:\t\t" + stressTestParams.ThreadCount);
+        Console.WriteLine("# in one thread:\t" + stressTestParams.RequestPerThread);
+        Console.WriteLine("Start:\t" + datetimeStart);
+        Console.WriteLine("End:\t" + datetimeEnd);
         Console.WriteLine(totalReport);
     }
 
     static async Task ProcessUrlAsync(string baseUrl, int threadNumber, int iteration, 
-        ConcurrentBag<ResponseInfo> requestStatistics)
+        ConcurrentBag<ResponseInfo> requestStatistics, int threads = 10)
     {
         int pageNum = (threadNumber - 1) * threads * 10 + iteration;
         string url = baseUrl + pageNum;

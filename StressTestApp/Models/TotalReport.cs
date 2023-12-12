@@ -56,14 +56,14 @@ public class TotalReport
     {
         return $"# of requests:\t\t{CountOfRequests}\n" +
                $"# of failed requests:\t{CountOfFailedRequests}\n" +
-               $"Success rate:\t\t{Math.Round(SuccessRate)}\n" +
-               $"AVG response time:\t{Math.Round(AverageResponseTime)}\n" +
+               $"Success rate:\t\t{Math.Round(SuccessRate*100)}%\n" +
+               //$"AVG response time:\t{Math.Round(AverageResponseTime)}\n" +
                $"MIN response time:\t{MinResponseTime}\n" +
                $"MAX response time:\t{MaxResponseTime}\n" +
-               $"50 percentile:\t\t{Math.Round(Percentile50)}\n" +
+               //$"50 percentile:\t\t{Math.Round(Percentile50)}\n" +
                $"90 percentile:\t\t{Math.Round(Percentile90)}\n" +
-               $"95 percentile:\t\t{Math.Round(Percentile95)}\n" +
-               $"99 percentile:\t\t{Math.Round(Percentile99)}\n" +
+               //$"95 percentile:\t\t{Math.Round(Percentile95)}\n" +
+               //$"99 percentile:\t\t{Math.Round(Percentile99)}\n" +
                $"Errors by status code:\n {string.Join(", ", ErrorsByStatusCode.Select(x => $"{x.Key} - {x.Value}"))}";
     }
 }
